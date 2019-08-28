@@ -37,8 +37,8 @@ public class Pet implements Serializable {
     @Override
     public String toString() {
         return "Pet{" +
-                "name='" + name + '\'' +
-                ", age=" + age +
+                "name='" + name +
+                "', age=" + age +
                 '}';
     }
 }
