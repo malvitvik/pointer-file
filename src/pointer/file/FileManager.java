@@ -65,7 +65,7 @@ public class FileManager {
         } catch (FileNotFoundException fex) {
             System.out.println("No file by path: " + serializeFile.getPath());
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            System.out.printf(e.getMessage());
         } catch (IOException ignore) {
         }
 
