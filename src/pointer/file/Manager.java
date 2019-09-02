@@ -24,7 +24,6 @@ public class Manager implements Serializable {
         }
 
         zooClub.put(person, new LinkedList<>());
-
         System.out.println(person + " is added.");
     }
 

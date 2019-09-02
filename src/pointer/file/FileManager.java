@@ -13,52 +13,48 @@ public class FileManager {
         try {
             this.txtFile.createNewFile();
             this.serializeFile.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignore) {
         }
     }
 
-    public void appendToFile(String data) {
-        writeToFile(data, true);
-    }
-
-    public void rewriteFile(String data) {
-        writeToFile(data, false);
-    }
-
-    private void writeToFile(String data, boolean append) {
+    public void writeToFile(String data, boolean append) {
         try (FileOutputStream fos = new FileOutputStream(txtFile, append);
              BufferedOutputStream bos = new BufferedOutputStream(fos)) {
             bos.write(data.getBytes());
         } catch (FileNotFoundException e) {
             System.out.println("No file by path: " + txtFile.getPath());
-        } catch (IOException e) {
+        } catch (IOException ignore) {
         }
+
+        System.out.println(append ? "Data are appended to file." : "File is rewritten.");
     }
 
     public String readFromFile() {
+        String empty = "{}";
+
         try (FileInputStream fis = new FileInputStream(txtFile);
              BufferedInputStream bis = new BufferedInputStream(fis)) {
             byte[] buffer = new byte[bis.available()];
             bis.read(buffer);
             String str = new String(buffer);
-            return str.isEmpty() ? "{}" : str;
+            return str.isEmpty() ? empty : str;
 
         } catch (FileNotFoundException e) {
             System.out.println("No file by path: " + txtFile.getPath());
-        } catch (IOException e) {
+        } catch (IOException ignore) {
         }
 
-        return "{}";
+        return empty;
     }
 
     public void serializeToFile(Serializable obj) {
-        try (FileOutputStream fout = new FileOutputStream(serializeFile);
-             ObjectOutputStream oos = new ObjectOutputStream(fout)) {
+        try (FileOutputStream fos = new FileOutputStream(serializeFile);
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(obj);
+            System.out.println("ZooClub is saved to file");
         } catch (FileNotFoundException fex) {
             System.out.println("No file by path: " + serializeFile.getPath());
-        } catch (IOException ioex) {
+        } catch (IOException ignore) {
         }
     }
 
@@ -68,10 +64,9 @@ public class FileManager {
             return (T) ois.readObject();
         } catch (FileNotFoundException fex) {
             System.out.println("No file by path: " + serializeFile.getPath());
-        } catch (IOException ioex) {
-            ioex.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+        } catch (IOException ignore) {
         }
 
         return null;

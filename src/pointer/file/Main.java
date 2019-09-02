@@ -21,12 +21,11 @@ public class Main {
                         if ("all".equalsIgnoreCase(next)) {
                             System.out.println(manager.getZooClub());
                             break;
-                        }
-
-                        if ("file".equalsIgnoreCase(next)) {
+                        } else if ("file".equalsIgnoreCase(next)) {
                             System.out.println(fileManager.readFromFile());
                             break;
                         }
+
                         System.out.println("Nothing to show.");
                         break;
 
@@ -60,25 +59,21 @@ public class Main {
                         break;
 
                     case WRITE:
-                        boolean rewrite = scanner.nextBoolean();
-
-                        if (rewrite) {
-                            fileManager.appendToFile(manager.getZooClub().toString());
-                            System.out.println("Data are appended to file.");
-                            break;
-                        }
-
-                        fileManager.rewriteFile(manager.getZooClub().toString());
-                        System.out.println("File is rewritten.");
+                        fileManager.writeToFile(manager.getZooClub().toString(), scanner.nextBoolean());
                         break;
 
                     case SAVE:
                         fileManager.serializeToFile(manager);
-                        System.out.println("ZooClub is saved to file");
                         break;
 
                     case RESTORE:
                         Manager restoredManager = fileManager.deserializeFromFile();
+
+                        if (restoredManager == null) {
+                            System.out.println("ZooClub is not restored from file.");
+                            break;
+                        }
+
                         manager.putAllToZooClub(restoredManager.getZooClub());
                         System.out.println("ZooClub is restored from file.");
                         break;
@@ -90,7 +85,7 @@ public class Main {
             } catch (IllegalArgumentException ex) {
                 System.out.println("Wrong command type");
                 scanner.nextLine();
-            } catch (InputMismatchException imex) {
+            } catch (InputMismatchException ex) {
                 System.out.println("Wrong parameter type. Try to use integer.");
                 scanner.nextLine();
             } finally {
@@ -100,16 +95,17 @@ public class Main {
     }
 
     private static void help() {
-        System.out.println("- add person <userName:String> <userAge:int>");
-        System.out.println("- add pet <userName:String> <userAge:int> <petName:String> <petAge: int>");
-        System.out.println("- remove person <userName:String> <userAge:int>");
-        System.out.println("- remove pet <userName:String> <userAge:int> <petName:String> <petAge: int>");
-        System.out.println("- remove pets <petName:String> <petAge: int>");
-        System.out.println("- show all|file - show current zoo club OR read from txt file to console");
-        System.out.println("- write true|false - append|rewrite txt file.");
-        System.out.println("- save - serialize zoo club to file.");
-        System.out.println("- restore - read from serialized file and add to zoo club.");
-        System.out.println("- help");
-        System.out.println("- exit");
+        StringBuilder stringBuilder = new StringBuilder("- add person <userName:String> <userAge:int>\n")
+                .append("- add pet <userName:String> <userAge:int> <petName:String> <petAge: int>\n")
+                .append("- remove person <userName:String> <userAge:int>\n")
+                .append("- remove pet <userName:String> <userAge:int> <petName:String> <petAge: int>\n")
+                .append("- remove pets <petName:String> <petAge: int>\n")
+                .append("- show all|file - show current zoo club OR read from txt file to console\n")
+                .append("- write true|false - append|rewrite txt file.\n")
+                .append("- save - serialize zoo club to file.\n")
+                .append("- restore - read from serialized file and add to zoo club.\n")
+                .append("- help\n")
+                .append("- exit");
+        System.out.println(stringBuilder);
     }
 }
