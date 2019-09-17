@@ -1,12 +1,34 @@
 package pointer.file;
 
+import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Main {
 
+    private static Scanner scanner;
+    private static Map<String, Function<Manager, String>> showMap = new HashMap<>();
+    private static Map<Creature, Consumer<Manager>> removeMap = new HashMap<>();
+    private static Map<Creature, Consumer<Manager>> addMap = new HashMap<>();
+
+    static {
+        showMap.put("all", (manager) -> manager.getZooClub().toString());
+        showMap.put("file", (manager) -> manager.getZooClub().toString());
+
+        removeMap.put(Creature.PERSON, (manager) -> manager.removePerson(createPerson()));
+        removeMap.put(Creature.PET, (manager) -> manager.removePetFromPerson(createPerson(), createPet()));
+        removeMap.put(Creature.PETS, (manager) -> manager.removePetFromAllPersons(createPet()));
+
+        addMap.put(Creature.PERSON, (manager) -> manager.addPerson(createPerson()));
+        addMap.put(Creature.PET, (manager) -> manager.addPetToPerson(createPerson(), createPet()));
+    }
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        scanner = new Scanner(System.in);
+
         Manager manager = new Manager();
         FileManager fileManager = new FileManager("zooclub.txt", "zooclub.ser");
 
@@ -17,45 +39,21 @@ public class Main {
             try {
                 switch (command) {
                     case SHOW:
-                        String next = scanner.next();
-                        if ("all".equalsIgnoreCase(next)) {
-                            System.out.println(manager.getZooClub());
-                            break;
-                        } else if ("file".equalsIgnoreCase(next)) {
-                            System.out.println(fileManager.readFromFile());
-                            break;
-                        }
+                        String str = showMap.getOrDefault(scanner.next(), (m) -> "Nothing to show.")
+                                .apply(manager);
 
-                        System.out.println("Nothing to show.");
+                        System.out.println(str);
                         break;
 
                     case ADD:
-                        Creature type = Creature.fromString(scanner.next());
-                        switch (type) {
-                            case PERSON:
-                                manager.addPerson(new Person(scanner.next(), scanner.nextInt()));
-                                break;
-                            case PET:
-                                manager.addPetToPerson(new Person(scanner.next(), scanner.nextInt()),
-                                        new Pet(scanner.next(), scanner.nextInt()));
-                                break;
-                        }
+                        addMap.getOrDefault(Creature.fromString(scanner.next()),
+                                (m) -> System.out.println("Cannot add."))
+                                .accept(manager);
                         break;
 
                     case REMOVE:
-                        type = Creature.fromString(scanner.next());
-                        switch (type) {
-                            case PERSON:
-                                manager.removePerson(new Person(scanner.next(), scanner.nextInt()));
-                                break;
-                            case PET:
-                                manager.removePetFromPerson(new Person(scanner.next(), scanner.nextInt()),
-                                        new Pet(scanner.next(), scanner.nextInt()));
-                                break;
-                            case PETS:
-                                manager.removePetFromAllPersons(new Pet(scanner.next(), scanner.nextInt()));
-                                break;
-                        }
+                        removeMap.getOrDefault(Creature.fromString(scanner.next()),
+                                (m) -> System.out.println("Cannot remove.")).accept(manager);
                         break;
 
                     case WRITE:
@@ -95,17 +93,24 @@ public class Main {
     }
 
     private static void help() {
-        StringBuilder stringBuilder = new StringBuilder("- add person <userName:String> <userAge:int>\n")
-                .append("- add pet <userName:String> <userAge:int> <petName:String> <petAge: int>\n")
-                .append("- remove person <userName:String> <userAge:int>\n")
-                .append("- remove pet <userName:String> <userAge:int> <petName:String> <petAge: int>\n")
-                .append("- remove pets <petName:String> <petAge: int>\n")
-                .append("- show all|file - show current zoo club OR read from txt file to console\n")
-                .append("- write true|false - append|rewrite txt file.\n")
-                .append("- save - serialize zoo club to file.\n")
-                .append("- restore - read from serialized file and add to zoo club.\n")
-                .append("- help\n")
-                .append("- exit");
-        System.out.println(stringBuilder);
+        System.out.println("- add person <userName:String> <userAge:int>\n" +
+                "- add pet <userName:String> <userAge:int> <petName:String> <petAge: int>\n" +
+                "- remove person <userName:String> <userAge:int>\n" +
+                "- remove pet <userName:String> <userAge:int> <petName:String> <petAge: int>\n" +
+                "- remove pets <petName:String> <petAge: int>\n" +
+                "- show all|file - show current zoo club OR read from txt file to console\n" +
+                "- write true|false - append|rewrite txt file.\n" +
+                "- save - serialize zoo club to file.\n" +
+                "- restore - read from serialized file and add to zoo club.\n" +
+                "- help\n" +
+                "- exit");
+    }
+
+    private static Person createPerson() {
+        return new Person(scanner.next(), scanner.nextInt());
+    }
+
+    private static Pet createPet() {
+        return new Pet(scanner.next(), scanner.nextInt());
     }
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class Manager implements Serializable {
     private Map<Person, List<Pet>> zooClub = new HashMap<>();
@@ -18,34 +19,29 @@ public class Manager implements Serializable {
     }
 
     public void addPerson(Person person) {
-        if (zooClub.containsKey(person)) {
-            System.out.println(person + " already exists in ZooClub.");
-            return;
-        }
-
-        zooClub.put(person, new LinkedList<>());
+        zooClub.putIfAbsent(person, new LinkedList<>());
         System.out.println(person + " is added.");
     }
 
     public void addPetToPerson(Person person, Pet pet) {
-        if (hasNoPerson(person)) return;
-
-        zooClub.get(person).add(pet);
-        System.out.println(pet + " is added to " + person);
+        acceptForPerson(person, pets -> {
+            pets.add(pet);
+            System.out.println(pet + " is added to " + person);
+        });
     }
 
     public void removePetFromPerson(Person person, Pet pet) {
-        if (hasNoPerson(person)) return;
-
-        zooClub.get(person).remove(pet);
-        System.out.println(pet + " is removed from " + person);
+        acceptForPerson(person, pets -> {
+            pets.remove(pet);
+            System.out.println(pet + " is removed from " + person);
+        });
     }
 
     public void removePerson(Person person) {
-        if (hasNoPerson(person)) return;
-
-        zooClub.remove(person);
-        System.out.println(person + " is removed.");
+        acceptForPerson(person, pets -> {
+            zooClub.remove(person);
+            System.out.println(person + " is removed.");
+        });
     }
 
     public void removePetFromAllPersons(Pet pet) {
@@ -53,11 +49,12 @@ public class Manager implements Serializable {
         System.out.println(pet + " is removed from all persons.");
     }
 
-    private boolean hasNoPerson(Person person) {
+    private void acceptForPerson(Person person, Consumer<List<Pet>> petConsumer) {
         if (!zooClub.containsKey(person)) {
             System.out.println(person + " doesn't exist in Zoo");
-            return true;
+            return;
         }
-        return false;
+
+        petConsumer.accept(zooClub.get(person));
     }
 }
