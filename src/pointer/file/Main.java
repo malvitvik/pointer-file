@@ -1,33 +1,26 @@
 package pointer.file;
 
-import java.util.HashMap;
-import java.util.InputMismatchException;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.*;
+import java.util.function.BiConsumer;
 
 public class Main {
 
-    private static Scanner scanner;
-    private static Map<String, Function<Manager, String>> showMap = new HashMap<>();
-    private static Map<Creature, Consumer<Manager>> removeMap = new HashMap<>();
-    private static Map<Creature, Consumer<Manager>> addMap = new HashMap<>();
+    private static Map<Creature, BiConsumer<Manager, Scanner>> removeMap = new HashMap<>();
+    private static Map<Creature, BiConsumer<Manager, Scanner>> addMap = new HashMap<>();
 
     static {
-        showMap.put("all", (manager) -> manager.getZooClub().toString());
-        showMap.put("file", (manager) -> manager.getZooClub().toString());
+        removeMap.put(Creature.PERSON, (manager, scanner) ->
+                manager.removePerson(createPerson(scanner)));
+        removeMap.put(Creature.PET, (manager, scanner) ->
+                manager.removePetFromPerson(createPerson(scanner), createPet(scanner)));
+        removeMap.put(Creature.PETS, (manager, scanner) -> manager.removePetFromAllPersons(createPet(scanner)));
 
-        removeMap.put(Creature.PERSON, (manager) -> manager.removePerson(createPerson()));
-        removeMap.put(Creature.PET, (manager) -> manager.removePetFromPerson(createPerson(), createPet()));
-        removeMap.put(Creature.PETS, (manager) -> manager.removePetFromAllPersons(createPet()));
-
-        addMap.put(Creature.PERSON, (manager) -> manager.addPerson(createPerson()));
-        addMap.put(Creature.PET, (manager) -> manager.addPetToPerson(createPerson(), createPet()));
+        addMap.put(Creature.PERSON, (manager, scanner) -> manager.addPerson(createPerson(scanner)));
+        addMap.put(Creature.PET, (manager, scanner) -> manager.addPetToPerson(createPerson(scanner), createPet(scanner)));
     }
 
     public static void main(String[] args) {
-        scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
 
         Manager manager = new Manager();
         FileManager fileManager = new FileManager("zooclub.txt", "zooclub.ser");
@@ -39,21 +32,30 @@ public class Main {
             try {
                 switch (command) {
                     case SHOW:
-                        String str = showMap.getOrDefault(scanner.next(), (m) -> "Nothing to show.")
-                                .apply(manager);
+                        String next = scanner.next();
 
-                        System.out.println(str);
+                        if ("all".equalsIgnoreCase(next)) {
+                            System.out.println(manager.getZooClub());
+                            break;
+                        }
+
+                        if ("file".equalsIgnoreCase(next)) {
+                            System.out.println(fileManager.readFromFile());
+                            break;
+                        }
+
+                        System.out.println("Nothing to show.");
                         break;
 
                     case ADD:
                         addMap.getOrDefault(Creature.fromString(scanner.next()),
-                                (m) -> System.out.println("Cannot add."))
-                                .accept(manager);
+                                (m, s) -> System.out.println("Cannot add."))
+                                .accept(manager, scanner);
                         break;
 
                     case REMOVE:
                         removeMap.getOrDefault(Creature.fromString(scanner.next()),
-                                (m) -> System.out.println("Cannot remove.")).accept(manager);
+                                (m, s) -> System.out.println("Cannot remove.")).accept(manager, scanner);
                         break;
 
                     case WRITE:
@@ -67,7 +69,7 @@ public class Main {
                     case RESTORE:
                         Manager restoredManager = fileManager.deserializeFromFile();
 
-                        if (restoredManager == null) {
+                        if (Objects.isNull(restoredManager)) {
                             System.out.println("ZooClub is not restored from file.");
                             break;
                         }
@@ -106,11 +108,11 @@ public class Main {
                 "- exit");
     }
 
-    private static Person createPerson() {
+    private static Person createPerson(Scanner scanner) {
         return new Person(scanner.next(), scanner.nextInt());
     }
 
-    private static Pet createPet() {
+    private static Pet createPet(Scanner scanner) {
         return new Pet(scanner.next(), scanner.nextInt());
     }
 }
