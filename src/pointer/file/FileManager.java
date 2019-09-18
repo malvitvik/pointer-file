@@ -1,12 +1,14 @@
 package pointer.file;
 
+import com.sun.istack.internal.NotNull;
+
 import java.io.*;
 
 public class FileManager {
     private File txtFile;
     private File serializeFile;
 
-    public FileManager(String txtPath, String serializePath) {
+    public FileManager(@NotNull String txtPath, @NotNull String serializePath) {
         this.txtFile = new File(txtPath);
         this.serializeFile = new File(serializePath);
 
@@ -17,10 +19,10 @@ public class FileManager {
         }
     }
 
-    public void writeToFile(String data, boolean append) {
+    public void writeToFile(@NotNull Object data, boolean append) {
         try (FileOutputStream fos = new FileOutputStream(txtFile, append);
              BufferedOutputStream bos = new BufferedOutputStream(fos)) {
-            bos.write(data.getBytes());
+            bos.write(data.toString().getBytes());
         } catch (FileNotFoundException e) {
             System.out.println("No file by path: " + txtFile.getPath());
         } catch (IOException ignore) {
@@ -65,7 +67,7 @@ public class FileManager {
         } catch (FileNotFoundException fex) {
             System.out.println("No file by path: " + serializeFile.getPath());
         } catch (ClassNotFoundException e) {
-            System.out.printf(e.getMessage());
+            System.out.print(e.getMessage());
         } catch (IOException ignore) {
         }
 

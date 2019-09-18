@@ -59,7 +59,7 @@ public class Main {
                         break;
 
                     case WRITE:
-                        fileManager.writeToFile(manager.getZooClub().toString(), scanner.nextBoolean());
+                        fileManager.writeToFile(manager.getZooClub(), scanner.nextBoolean());
                         break;
 
                     case SAVE:

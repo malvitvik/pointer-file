@@ -1,5 +1,7 @@
 package pointer.file;
 
+import com.sun.istack.internal.NotNull;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,42 +16,42 @@ public class Manager implements Serializable {
         return zooClub;
     }
 
-    public void putAllToZooClub(Map<Person, List<Pet>> map) {
+    public void putAllToZooClub(@NotNull Map<Person, List<Pet>> map) {
         this.zooClub.putAll(map);
     }
 
-    public void addPerson(Person person) {
+    public void addPerson(@NotNull Person person) {
         zooClub.putIfAbsent(person, new LinkedList<>());
         System.out.println(person + " is added.");
     }
 
-    public void addPetToPerson(Person person, Pet pet) {
+    public void addPetToPerson(@NotNull Person person, @NotNull Pet pet) {
         acceptForPerson(person, pets -> {
             pets.add(pet);
             System.out.println(pet + " is added to " + person);
         });
     }
 
-    public void removePetFromPerson(Person person, Pet pet) {
+    public void removePetFromPerson(@NotNull Person person, @NotNull Pet pet) {
         acceptForPerson(person, pets -> {
             pets.remove(pet);
             System.out.println(pet + " is removed from " + person);
         });
     }
 
-    public void removePerson(Person person) {
+    public void removePerson(@NotNull Person person) {
         acceptForPerson(person, pets -> {
             zooClub.remove(person);
             System.out.println(person + " is removed.");
         });
     }
 
-    public void removePetFromAllPersons(Pet pet) {
+    public void removePetFromAllPersons(@NotNull Pet pet) {
         zooClub.values().forEach(list -> list.remove(pet));
         System.out.println(pet + " is removed from all persons.");
     }
 
-    private void acceptForPerson(Person person, Consumer<List<Pet>> petConsumer) {
+    private void acceptForPerson(@NotNull Person person, @NotNull Consumer<List<Pet>> petConsumer) {
         if (!zooClub.containsKey(person)) {
             System.out.println(person + " doesn't exist in Zoo");
             return;
